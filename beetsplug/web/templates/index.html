@@ -1,47 +1,152 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>beets</title>
+  <head>
+    <title>Aiolos</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type='text/css' href='https://fonts.googleapis.com/css?family=Balthazar'/>
+    <link rel='stylesheet' type='text/css' href='https://cdn.fruitopology.net/fonts/fonts.css'/>
+    <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='beets.css') }}"/>
+    <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='main.css') }}"/>
+    <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='dgplayer/player.css') }}"/>
 
-        <link rel="stylesheet"
-        href="{{ url_for('static', filename='beets.css') }}" type="text/css">
+    <script type="text/javascript" src="https://cdn.fruitopology.net/js/vendor/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="https://cdn.fruitopology.net/js/vendor/underscore-min.js"></script>
+    <script type="text/javascript" src="https://cdn.fruitopology.net/js/vendor/backbone-min.js"></script>
+    <script type="text/javascript" src="https://cdn.fruitopology.net/js/vendor/d3.v3.min.js"></script>
+    <script type="text/javascript" src="https://cdn.fruitopology.net/js/vendor/aurora/aurora.js"></script>
+    <script type="text/javascript" src="https://cdn.fruitopology.net/js/vendor/aurora/flac.js"></script>
+    <script type="text/javascript" src="https://cdn.fruitopology.net/js/vendor/aurora/alac.js"></script>
+    <script type="text/javascript" src="https://cdn.fruitopology.net/js/vendor/aurora/mp3.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='dgplayer/player.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='dgplayer/auroraplayer.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='beets.js') }}"></script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>beets</h1>
+      <div id="player">
+        <audio id="audio-media-element"></audio>
 
-        <script src="{{ url_for('static', filename='jquery.js') }}"></script>
-        <script src="{{ url_for('static', filename='underscore.js') }}">
-        </script>
-        <script src="{{ url_for('static', filename='backbone.js') }}"></script>
-        <script src="{{ url_for('static', filename='beets.js') }}"></script>
-    </head>
-    <body>
-        <div id="header">
-            <h1>beets</h1>
-            <div id="player">
-                <audio></audio>
+        <button class="disabled">&#9654;</button>
+        <button class="play">&#9654;</button>
+        <button class="pause" style="letter-spacing: 1px;">&#10073;&#10073;</button>
 
-                <button class="disabled">&#9654;</button>
-                <button class="play">&#9654;</button>
-                <button class="pause" style="letter-spacing: 1px;">&#10073;&#10073;</button>
+        <span class="times">
+          <span class="currentTime">
+          </span>
+        </span>
+      </div>
+    </div>
 
-                <span class="times">
-                    <span class="currentTime">
-                    </span>
-                </span>
-            </div>
+    <div id="entities">
+      <form id="queryForm">
+        <input type="search" id="query" placeholder="Query">
+      </form>
+      <ul id="results">
+      </ul>
+    </div>
+    <div id="track-info">
+      <div id="main-detail">
+      </div>
+
+      <div id="extra-detail">
+      </div>
+    </div>
+
+    <div id="unsupported">
+      Update your browser.
+    </div>
+
+    <div class="player" id="dgplayer" tabindex="0">
+      <div class="avatar">
+        <img src="{{ url_for('static', filename='dgplayer/resources/fallback_album_art.png') }}">
+      </div>
+
+      <span class="title">Unknown Title</span>
+      <span class="artist">Unknown Artist</span>
+
+      <div class="button"></div>
+
+      <div class="volume">
+        <img src="{{ url_for('static', filename='dgplayer/resources/volume_high.png') }}">
+        <div class="track">
+          <div class="progress"></div>
+          <div class="handle"></div>
         </div>
+        <img src="{{ url_for('static', filename='dgplayer/resources/volume_low.png') }}">
+      </div>
 
-        <div id="entities">
-            <form id="queryForm">
-                <input type="search" id="query" placeholder="Query">
-            </form>
-            <ul id="results">
-            </ul>
+      <div class="seek">
+        <span>0:00</span>
+        <div class="track">
+          <div class="loaded"></div>
+          <div class="progress"></div>
         </div>
+        <span>-0:00</span>
+      </div>
 
-        <div id="main-detail">
-        </div>
+      <div class="file_button"></div>
+      <span class="file_description">Load the currently selected file</span>
+    </div>
 
-        <div id="extra-detail">
-        </div>
+
+<script type="text/javascript">
+var unsupported;
+if (!window.Audio || !('mozWriteAudio' in new Audio()) && !window.AudioContext && !window.webkitAudioContext) {
+  unsupported = true;
+}
+// Chrome doesn't support changing the sample rate, and uses whatever the hardware supports.
+// We cheat here.  Instead of resampling on the fly, we're currently just loading two different
+// files based on common hardware sample rates.
+var _sampleRate = (function() {
+  var AudioContext = (window.AudioContext || window.webkitAudioContext);
+  if (!AudioContext)
+    return 44100;
+
+  return new AudioContext().sampleRate;
+}());
+
+(function(DGPlayer){
+  if (unsupported) return;
+
+  DGPlayer.volume = 100;
+
+  var player, onplay;
+  var url = '';
+
+  DGPlayer.on('play', onplay = function(){
+    if (player)
+      player.disconnect();
+
+    player = new DGAuroraPlayer(AV.Player.fromURL(url), DGPlayer);
+    DGPlayer.off('play', onplay);
+  });
+
+  DGPlayer.on('file', function(file) {
+    if (file) {
+      if (player)
+        player.disconnect();
+
+      player = new DGAuroraPlayer(AV.Player.fromFile(file), DGPlayer);
+      DGPlayer.off('play', onplay);
+    }
+  });
+
+}(DGPlayer(document.getElementById('dgplayer'))));
+</script>
+
+<!-- Templates. -->
+<script type="text/template" id="item-entry-template">
+    <%= title %>
+    <span class="playing">&#9654;</span>
+</script>
+<script type="text/template" id="item-main-detail-template">
+    <span class="artist"><%= artist %></span>
+    <span class="album">
+        <span class="albumtitle"><%= album %></span>
+        <span class="year">(<%= year %>)</span>
+    </span>
+    <span class="title"><%= title %></span>
 
         <!-- Templates. -->
         <script type="text/template" id="item-entry-template">
@@ -58,7 +163,7 @@
 
             <button class="play">&#9654;</button>
 
-            
+
         </script>
         <script type="text/template" id="item-extra-detail-template">
             <dl>

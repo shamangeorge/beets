@@ -1,5 +1,5 @@
 body {
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: Balthazaar, Arial, sans-serif;
 }
 
 #header {
@@ -88,13 +88,17 @@ body {
 }
 
 
-#main-detail, #extra-detail {
-    position: fixed;
-    left: 17em;
-    margin: 1.0em 0 0 1.5em;
+#extra-detail {
+    position: relative;
 }
-#main-detail {
-    top: 36px;
+#track-info {
+    color: black;
+    width: 400px;
+    min-height: 220px;
+    top: 32px;
+    margin-left:auto;
+    margin-right:auto;
+    position: relative;
     height: 98px;
 }
 #main-detail .artist, #main-detail .album, #main-detail .title {
@@ -111,7 +115,6 @@ body {
 #extra-detail {
     overflow-x: hidden;
     overflow-y: auto;
-    top: 134px;
     bottom: 0;
     right: 0;
 }
