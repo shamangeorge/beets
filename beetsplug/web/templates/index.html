@@ -91,6 +91,7 @@
 
 
 <script type="text/javascript">
+var _PT_ID = null;
 var unsupported;
 if (!window.Audio || !('mozWriteAudio' in new Audio()) && !window.AudioContext && !window.webkitAudioContext) {
   unsupported = true;
@@ -115,19 +116,31 @@ var _sampleRate = (function() {
   var url = '';
 
   DGPlayer.on('play', onplay = function(){
-    if (player)
+    if (player) {
+      clearTimeout(_PT_ID);
       player.disconnect();
-
+    }
     player = new DGAuroraPlayer(AV.Player.fromURL(url), DGPlayer);
     DGPlayer.off('play', onplay);
   });
 
   DGPlayer.on('file', function(file) {
     if (file) {
-      if (player)
+      if (player) {
+        clearTimeout(_PT_ID);
         player.disconnect();
+      }
 
       player = new DGAuroraPlayer(AV.Player.fromFile(file), DGPlayer);
+      player.player.on('end', function onEnd(event) {
+        console.log(event);
+        // Grab the next item to the selected item
+        // just another hack
+        var nextSong = $('.selected').next();
+        nextSong.trigger('click');
+        nextSong.dblclick();
+      });
+
       DGPlayer.off('play', onplay);
     }
   });
