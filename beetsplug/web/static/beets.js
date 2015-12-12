@@ -265,8 +265,10 @@ var AppView = Backbone.View.extend({
     },
     playItem: function(item) {
         var url = 'item/' + item.get('id') + '/file';
-        $('#player audio').attr('src', url);
-        $('#player audio').get(0).play();
+        //$('#player audio').attr('src', url);
+        //$('#player audio').get(0).play();
+        // Play with the aurora player by default
+        $('.file_button').trigger('click');
 
         if (this.playingItem != null) {
             this.playingItem.entryView.setPlaying(false);
