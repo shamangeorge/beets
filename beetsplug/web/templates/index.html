@@ -25,11 +25,11 @@
     <div id="header">
       <h1>beets</h1>
       <div id="player">
-        <audio id="audio-media-element"></audio>
+        <!--<audio id="audio-media-element"></audio>-->
 
-        <button class="disabled">&#9654;</button>
-        <button class="play">&#9654;</button>
-        <button class="pause" style="letter-spacing: 1px;">&#10073;&#10073;</button>
+        <!--<button class="disabled">&#9654;</button>-->
+        <!--<button class="play">&#9654;</button>-->
+        <!--<button class="pause" style="letter-spacing: 1px;">&#10073;&#10073;</button>-->
 
         <span class="times">
           <span class="currentTime">
@@ -133,7 +133,6 @@ var _sampleRate = (function() {
 
       player = new DGAuroraPlayer(AV.Player.fromFile(file), DGPlayer);
       player.player.on('end', function onEnd(event) {
-        console.log(event);
         // Grab the next item to the selected item
         // just another hack
         var nextSong = $('.selected').next();

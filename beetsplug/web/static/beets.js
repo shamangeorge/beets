@@ -54,12 +54,12 @@ $.fn.player = function(debug) {
             console.log(msg);
     }
     var showState = function() {
-        if (audio.duration == undefined || isNaN(audio.duration)) {
+        if (audio && (audio.duration == undefined || isNaN(audio.duration))) {
             playBtn.hide();
             pauseBtn.hide();
             disabledInd.show();
             timesEl.hide();
-        } else if (audio.paused) {
+        } else if (audio && audio.paused) {
             playBtn.show();
             pauseBtn.hide();
             disabledInd.hide();
@@ -72,6 +72,7 @@ $.fn.player = function(debug) {
         }
     }
     var showTimes = function() {
+      if (audio) {
         curTimeEl.text(timeFormat(audio.currentTime));
         totalTimeEl.text(timeFormat(audio.duration));
 
@@ -86,6 +87,7 @@ $.fn.player = function(debug) {
         }
         sliderLoadedEl.css('width',
                 timePercent(bufferEnd, audio.duration));
+      }
     }
 
     // Initialize controls.
