@@ -1,0 +1,3 @@
+[submodule "beetsplug/web/static/dgplayer"]
+	path = beetsplug/web/static/dgplayer
+	url = git@github.com:shamangeorge/dgplayer
